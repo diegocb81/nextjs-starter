@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Um novo push na mesma branch cancela a execução anterior (economiza minutos)
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# O workflow só precisa ler o código
+permissions:
+  contents: read
+
+# Sistema fixado em vez de "ubuntu-latest": o "latest" muda sem aviso (passou
+# para o 26.04, que o Playwright 1.59 não suportava). Atualizar o sistema
+# vira uma decisão explícita, feita junto com a atualização do Playwright.
+
+# Segredos (Settings > Secrets and variables > Actions; os mesmos na aba
+# Dependabot): NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
+# TEST_USER_EMAIL e TEST_USER_PASSWORD. Sem eles (projeto recém-criado), o
+# build usa um Supabase fictício e os testes que exigem login são pulados.
+env:
+  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321' }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'chave-ficticia-para-testes' }}
+
+jobs:
+  # 1. Verificações rápidas, sem servidor nem banco (~1 min)
+  quality:
+    name: Lint, tipos e testes unitários
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
+  # 2. Testes de ponta a ponta contra o build de produção.
+  #    Só roda se as verificações rápidas passarem.
+  e2e:
+    name: Testes E2E (Playwright)
+    needs: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      # Não há RESEND_API_KEY: nenhum teste envia e-mail.
+      TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+    steps:
+      # Avisa (sem falhar) quando faltam segredos: num projeto recém-criado é
+      # esperado; num projeto em produção, o aviso no PR mostra o que falta.
+      - name: Verificar segredos do repositório
+        env:
+          HAS_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}
+          HAS_SUPABASE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' }}
+        run: |
+          missing=""
+          [ "$HAS_SUPABASE_URL" = "true" ] || missing="$missing NEXT_PUBLIC_SUPABASE_URL"
+          [ "$HAS_SUPABASE_KEY" = "true" ] || missing="$missing NEXT_PUBLIC_SUPABASE_ANON_KEY"
+          [ -n "$TEST_USER_EMAIL" ] || missing="$missing TEST_USER_EMAIL"
+          [ -n "$TEST_USER_PASSWORD" ] || missing="$missing TEST_USER_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::warning::Segredos ausentes:$missing. Os testes que exigem login real serão pulados. Cadastre-os em Settings > Secrets and variables > Actions."
+          else
+            echo "Os 4 segredos estão definidos."
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Só o Chromium (CI mais rápido). Para mais navegadores, ver o README.
+      - run: npx playwright install --with-deps chromium
+      # Reaproveita o cache de compilação do Next entre execuções
+      - uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-${{ hashFiles('src/**') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
+      # As variáveis NEXT_PUBLIC_* são embutidas no código durante o build
+      - run: npm run build
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  # 3. Notas mínimas do Lighthouse (lighthouserc.json): reprova o PR se
+  #    performance, acessibilidade, boas práticas ou SEO caírem.
+  lighthouse:
+    name: Lighthouse (performance, a11y, SEO)
+    needs: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run lhci
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 14

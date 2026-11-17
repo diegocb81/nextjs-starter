@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@theme {
+  --color-fundo: #1C1C1C;
+  --color-marca-clara: #F3E5AB;
+  --color-marca: #D4AF37;
+  --color-marca-escura: #B8860B;
+}
+
+/* "inline": as classes font-sans/font-serif passam a usar as variáveis
+   criadas pelo next/font no layout. As fontes seguintes são reservas
+   enquanto a principal carrega. */
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-cormorant), Georgia, "Times New Roman", serif;
+}
+
+/* Animações decorativas em loop (brilho dos botões, seta), em CSS puro:
+   o navegador as executa sem ocupar o JavaScript a cada quadro, e a regra
+   de "reduzir movimento" no fim deste arquivo as desliga automaticamente.
+   Cada --animate-* vira uma classe: animate-aura, animate-nudge etc. */
+@theme {
+  --animate-aura: aura 2s ease-in-out infinite;
+  --animate-aura-soft: aura-soft 2.5s ease-in-out infinite;
+  --animate-aura-strong: aura-strong 2s ease-in-out infinite;
+  --animate-nudge: nudge 1.5s ease-in-out infinite;
+
+  @keyframes aura {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.1); }
+  }
+
+  @keyframes aura-soft {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.5; }
+  }
+
+  @keyframes aura-strong {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.4); }
+  }
+
+  @keyframes nudge {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(5px); }
+  }
+}
+
+/* Base */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-fundo);
+  color: var(--color-marca);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer base {
+  /* Foco visível para quem navega pelo teclado (WCAG 2.4.7).
+     :focus-visible não aparece em cliques de mouse, só quando faz sentido.
+     Por estar na camada "base", um componente ainda pode definir o próprio
+     indicador de foco com classes utilitárias. */
+  :focus-visible {
+    outline: 2px solid var(--color-marca-clara);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* Link "Pular para o conteúdo": invisível até receber foco pelo teclado.
+   Evita que a pessoa precise passar por todo o menu a cada página (WCAG 2.4.1). */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -10rem;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--color-marca);
+  color: var(--color-fundo);
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 2px;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Respeita a preferência "reduzir movimento" do sistema operacional
+   (WCAG 2.3.3): desliga a rolagem suave e as animações/transições em CSS.
+   As animações feitas em JavaScript (framer-motion) são tratadas pelo
+   MotionConfig em src/components/Providers.tsx. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

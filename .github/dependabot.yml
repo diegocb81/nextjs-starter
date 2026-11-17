@@ -1,0 +1,34 @@
+# Dependabot: abre PRs de atualização de dependências toda segunda-feira.
+# Cada PR passa pelo CI (lint, tipos, unitários e E2E) antes do merge.
+#
+# Importante: PRs do Dependabot não recebem os segredos de "Actions". Os
+# mesmos 4 segredos precisam existir também em Settings > Secrets and
+# variables > Dependabot, senão o job E2E falha na verificação de segredos.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "08:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      # Atualizações pequenas (correções e novidades compatíveis) num PR só
+      menores:
+        update-types: [minor, patch]
+    # Versões principais (ex.: framer-motion 14, ESLint 10, TypeScript 7)
+    # chegam em PRs separados, um por pacote, para serem avaliadas com calma.
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
