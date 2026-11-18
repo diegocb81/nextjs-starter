@@ -16,7 +16,9 @@ const FIELD_ORDER = ['nome', 'email', 'telefone', 'assunto', 'mensagem'] as cons
 const labelClass = "text-white/80 font-bold text-xs uppercase tracking-widest";
 const inputClass = "w-full bg-transparent border-b border-white/10 py-1.5 text-sm text-white focus:outline-none placeholder:text-white/60";
 const underlineClass = "absolute bottom-0 left-0 w-0 h-0.5 bg-marca transition-all duration-500 group-focus-within:w-full";
-const errorClass = "text-red-400 text-xs italic absolute -bottom-0.5 left-0";
+// No fluxo normal (não absoluto): uma mensagem longa que quebre em duas linhas
+// no celular empurra o conteúdo para baixo em vez de cobrir o campo.
+const errorClass = "text-red-400 text-xs italic";
 
 export default function ContatoPage() {
   const [loading, setLoading] = useState(false);
@@ -41,9 +43,9 @@ export default function ContatoPage() {
     'aria-describedby': errors[name] ? `contato-${name}-erro` : undefined,
   });
 
-  const renderError = (name: string, className = errorClass) =>
+  const renderError = (name: string) =>
     errors[name] && (
-      <span id={`contato-${name}-erro`} className={className}>
+      <span id={`contato-${name}-erro`} className={errorClass}>
         {errors[name]}
       </span>
     );
@@ -219,7 +221,7 @@ export default function ContatoPage() {
               <textarea name="mensagem" rows={3} className={`${inputClass} resize-none`} placeholder="Conte-nos brevemente..." {...fieldA11y('mensagem')}></textarea>
               <div className={underlineClass} />
             </div>
-            {renderError('mensagem', "text-red-400 text-xs italic absolute bottom-0.5 left-0")}
+            {renderError('mensagem')}
           </div>
 
           <div className="md:col-span-2 mt-2">
