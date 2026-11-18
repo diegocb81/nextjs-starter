@@ -88,6 +88,8 @@ Copiar `.env.example` para `.env.local` e preencher. Nunca versionar o `.env.loc
 - **E2E:** formulário (com escritas simuladas), API, login, painel, home, SEO, LGPD e acessibilidade (axe em desktop e mobile).
 - Os testes **não gravam dados reais**. Para uma integração real (grava no banco e envia e-mail): `$env:E2E_REAL="1"; npx playwright test contact-flow`.
 - Sem Supabase configurado, os testes usam um endereço fictício e pulam os que exigem login.
+- **Build local sem `.env.local`:** as variáveis `NEXT_PUBLIC_*` são gravadas no JavaScript na hora do build. Sem elas, o formulário não envia e os testes de envio falham no modo CI. Gere o build com os valores fictícios (o CI já faz isso):
+  `$env:NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:54321"; $env:NEXT_PUBLIC_SUPABASE_ANON_KEY="chave-ficticia-para-testes"; npm run build`
 - O login do painel é feito uma vez pelo projeto `setup` do Playwright (sessão em `playwright/.auth/`, fora do Git).
 - **Mais navegadores:** o CI usa só o Chromium, que é mais rápido. Para Firefox, Safari e celulares, acrescente projetos em `playwright.config.ts` (ex.: `devices['Desktop Firefox']`, `devices['iPhone 14']`) e instale com `npx playwright install --with-deps`.
 
