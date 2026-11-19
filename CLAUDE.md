@@ -9,6 +9,7 @@ Template base para sites de clientes (Next.js + Supabase + Resend). Ao criar um 
 - `npm run dev`: desenvolvimento (porta 3000).
 - Verificações antes de propor commits: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` e `CI=1 npx playwright test`.
 - Para testar ao mesmo tempo que outro projeto ocupa a porta 3000: `BASE_URL=http://localhost:3400`.
+- Sem `.env.local`, gere o build com os valores fictícios antes do E2E em modo CI (as `NEXT_PUBLIC_*` são gravadas no build; sem elas, os testes de envio falham): `$env:NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:54321"; $env:NEXT_PUBLIC_SUPABASE_ANON_KEY="chave-ficticia-para-testes"; npm run build`.
 - Notas mínimas de Lighthouse: `npm run build && npm run lhci` (precisa de Chrome; ver README).
 
 ## Regras do projeto
