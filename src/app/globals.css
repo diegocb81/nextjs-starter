@@ -89,6 +89,21 @@ body {
   top: 1rem;
 }
 
+/* Botão flutuante do WhatsApp no celular (abaixo de 768px, o "md" do Tailwind) */
+@media (width < 48rem) {
+  /* Enquanto a pessoa digita, o teclado virtual reduz a tela e o botão
+     ficaria sobre o campo em uso: some durante o foco e volta depois.
+     visibility (e não só opacity) também o tira do clique e do Tab. */
+  .whatsapp-flutuante {
+    transition: opacity 0.2s, visibility 0.2s;
+  }
+
+  body:has(:is(input, textarea, select):focus) .whatsapp-flutuante {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
 /* Respeita a preferência "reduzir movimento" do sistema operacional
    (WCAG 2.3.3): desliga a rolagem suave e as animações/transições em CSS.
    As animações feitas em JavaScript (framer-motion) são tratadas pelo
