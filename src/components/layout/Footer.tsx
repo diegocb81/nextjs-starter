@@ -3,7 +3,9 @@ import { SITE_NAME } from '@/lib/site';
 
 export const Footer = () => {
   return (
-    <footer className="py-10 bg-fundo border-t border-marca/10 text-center">
+    // No celular, o fim do rodapé reserva espaço para o botão flutuante do
+    // WhatsApp (56px + margem): rolando até o fim, a última linha fica acima dele.
+    <footer className="pt-10 pb-28 md:pb-10 bg-fundo border-t border-marca/10 text-center">
       <div className="max-w-6xl mx-auto px-8">
         <p className="text-white/60 text-[11px] font-light">
           &copy; {new Date().getFullYear()} {SITE_NAME}.
