@@ -5,7 +5,9 @@ import { CONTACT } from '@/lib/site';
 
 export default function WhatsAppButton() {
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    // "whatsapp-flutuante": no celular, o globals.css esconde o botão enquanto
+    // um campo de formulário está em foco (o teclado virtual o jogaria sobre o campo)
+    <div className="whatsapp-flutuante fixed bottom-6 right-6 z-50">
       {/* Aura Verde Pulsante */}
       <div aria-hidden="true" className="absolute inset-0 bg-[#25D366] rounded-full blur-md animate-aura-strong" />
 
