@@ -218,7 +218,10 @@ export default function ContatoPage() {
           <div className="flex flex-col gap-1 group md:col-span-2 relative pb-6">
             <label htmlFor="contato-mensagem" className={labelClass}>Mensagem</label>
             <div className="relative">
-              <textarea name="mensagem" rows={3} className={`${inputClass} resize-none`} placeholder="Conte-nos brevemente..." {...fieldA11y('mensagem')}></textarea>
+              {/* block: como elemento em linha, a textarea reservava embaixo o
+                  espaço das "pernas" das letras (6px), e a linha dourada de
+                  destaque ficava abaixo da linha do campo */}
+              <textarea name="mensagem" rows={3} className={`${inputClass} block resize-none`} placeholder="Conte-nos brevemente..." {...fieldA11y('mensagem')}></textarea>
               <div className={underlineClass} />
             </div>
             {renderError('mensagem')}
