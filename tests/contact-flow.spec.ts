@@ -106,6 +106,25 @@ test.describe('Formulário de contato', () => {
     // O lead está no painel; a empresa o verá mesmo sem o e-mail
     await expect(form.successHeading).toBeVisible();
   });
+
+  test('a linha de destaque de cada campo encosta na base do campo', async ({ page }) => {
+    await new ContactPage(page).goto();
+
+    // Para cada campo: distância entre a base do campo (linha cinza) e a base
+    // da linha de destaque que aparece no foco (div absoluta no fundo do contêiner)
+    const gaps = await page.evaluate(() =>
+      [...document.querySelectorAll('form input:not([name="sobrenome"]), form select, form textarea')].map((el) => {
+        const line = el.parentElement!.querySelector('.absolute.bottom-0')!;
+        return {
+          campo: el.getAttribute('name'),
+          distancia: Math.round(line.getBoundingClientRect().bottom - el.getBoundingClientRect().bottom),
+        };
+      }),
+    );
+
+    expect(gaps).toHaveLength(5);
+    for (const gap of gaps) expect(gap).toEqual({ campo: gap.campo, distancia: 0 });
+  });
 });
 
 // Teste ponta a ponta REAL: grava no Supabase e envia e-mail de verdade.
