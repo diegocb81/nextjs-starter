@@ -105,7 +105,7 @@ As notas variam com a carga da máquina; o CI (ambiente limpo) é a referência.
 
 ## Notas de manutenção
 
-- **`npm audit`:** os alertas restantes vêm do `@lhci/cli`, ferramenta que só roda no CI e não vai para o site publicado. O Dependabot propõe a atualização quando houver versão corrigida.
+- **`npm audit`:** sem alertas desde o `@lhci/cli` 0.16. Ele embute o Lighthouse 13, que pede Node ≥ 22.19: com Node mais antigo, o npm mostra um aviso `EBADENGINE` (o Lighthouse roda mesmo assim, mas vale manter o Node local atualizado, igual ao do CI).
 - **Runner do CI** fixado em `ubuntu-24.04`: atualizar junto com o Playwright.
 
 ---

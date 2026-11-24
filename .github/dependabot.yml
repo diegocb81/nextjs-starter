@@ -22,6 +22,13 @@ updates:
         update-types: [minor, patch]
     # Versões principais (ex.: framer-motion 14, ESLint 10, TypeScript 7)
     # chegam em PRs separados, um por pacote, para serem avaliadas com calma.
+    ignore:
+      # @types/node descreve as funções do Node para o TypeScript e deve
+      # seguir a versão principal do Node que roda o projeto (a do CI,
+      # node-version em ci.yml). Tipos de um Node mais novo aceitariam funções
+      # que não existem em produção. Atualizar à mão, junto com o Node.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
