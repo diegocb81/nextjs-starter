@@ -21,6 +21,7 @@ Template base para sites de clientes (Next.js + Supabase + Resend). Ao criar um 
 - **Supabase com RLS** (`supabase/schema.sql`): `anon` só insere em `leads`; `authenticated` lê, altera e exclui. O RLS bloqueia sem acusar erro, por isso as escritas da equipe conferem as linhas afetadas (`ensureAffected` em `src/services/leadService.ts`). Mudança de permissão exige atualizar o `schema.sql` e passar o SQL ao Diego.
 - **Clientes de SDK** (Supabase no navegador, Resend) são criados no uso, nunca no topo do módulo: o build do CI pode não ter as chaves.
 - **Performance:** texto acima da dobra nunca nasce com `opacity: 0` (atrasa o LCP); bibliotecas pesadas usadas só em uma ação (ex.: Zod e Supabase no envio do formulário) entram por `import()` dinâmico; texto com no mínimo 12px no conteúdo principal.
+- **framer-motion fica no 12:** o 14 piorou a performance da home (medição alternada 12/14/12/14 com Lighthouse 13 no celular, aqui e no Coffee Break da Ilha: medianas 96/90/97/89 no template, TBT maior). Não mergear o PR do Dependabot do 14 até investigar a causa (suspeita: o título do Hero, com uma animação por letra). Qualquer troca de versão do framer-motion exige medição alternada e repetida (`npm run lhci` em cada versão, intercaladas), nunca uma rodada só.
 - **Acessibilidade:** toda página nova entra na lista `PAGES` de `tests/a11y.spec.ts` (axe, desktop e mobile).
 - **LGPD:** formulário novo que colete outros dados ou serviço novo que receba dados exige atualizar `src/app/(public)/privacidade/page.tsx`.
 
